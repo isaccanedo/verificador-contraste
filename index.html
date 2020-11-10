@@ -165,25 +165,25 @@
                         if (radioButtons[i].checked) var threshold = radioButtons[i].value;
                     }
                     if ((threshold == "aa-ui" && contrastRatio >= 3) || (threshold == "aa-text" && contrastRatio >= 4.5) || (threshold == "aaa-text" && contrastRatio >= 7) || threshold == "all") {
-                        swatches += "<li><span style='background-color:" + backgroundColor + ";color:" + foregroundColor + "'>Sample text</span>";
+                        swatches += "<li><span style='background-color:" + backgroundColor + ";color:" + foregroundColor + "'>Texto simples</span>";
                         swatches += "<h3>" + foregroundColor.toUpperCase() + "<br>" + backgroundColor.toUpperCase() + "</h3>";
                         swatches += "<dl><dt>Ratio</dt><dd>" + contrastRatio.toFixed(2) + ":1</dd>";
                         if (contrastRatio < 3) {
-                            swatches += "<dt>AAA text</dt><dd class='fail'>Fail</dd>";
-                            swatches += "<dt>AA text</dt><dd class='fail'>Fail</dd>";
-                            swatches += "<dt>AA UI</dt><dd class='fail'>Fail</dd>";
+                            swatches += "<dt>AAA text</dt><dd class='fail'>Reprovado!</dd>";
+                            swatches += "<dt>AA text</dt><dd class='fail'>Reprovado!</dd>";
+                            swatches += "<dt>AA UI</dt><dd class='fail'>Reprovado!</dd>";
                         } else if (contrastRatio < 4.5) {
-                            swatches += "<dt>AAA text</dt><dd class='fail'>Fail</dd>";
-                            swatches += "<dt>AA text</dt><dd class='fail'>Fail</dd>";
-                            swatches += "<dt>AA UI</dt><dd class='pass'>Pass</dd>";
+                            swatches += "<dt>AAA text</dt><dd class='fail'>Reprovado!</dd>";
+                            swatches += "<dt>AA text</dt><dd class='fail'>Reprovado!</dd>";
+                            swatches += "<dt>AA UI</dt><dd class='pass'>Aprovado!</dd>";
                         } else if (contrastRatio < 7) {
-                            swatches += "<dt>AAA text</dt><dd class='fail'>Fail</dd>";
-                            swatches += "<dt>AA text</dt><dd class='pass'>Pass</dd>";
-                            swatches += "<dt>AA UI</dt><dd class='pass'>Pass</dd>";
+                            swatches += "<dt>AAA text</dt><dd class='fail'>Reprovado!</dd>";
+                            swatches += "<dt>AA text</dt><dd class='pass'>Aprovado!</dd>";
+                            swatches += "<dt>AA UI</dt><dd class='pass'>Aprovado!</dd>";
                         } else {
-                            swatches += "<dt>AAA text</dt><dd class='pass'>Pass</dd>";
-                            swatches += "<dt>AA text</dt><dd class='pass'>Pass</dd>";
-                            swatches += "<dt>AA UI</dt><dd class='pass'>Pass</dd>";
+                            swatches += "<dt>AAA text</dt><dd class='pass'>Aprovado!</dd>";
+                            swatches += "<dt>AA text</dt><dd class='pass'>Aprovado!</dd>";
+                            swatches += "<dt>AA UI</dt><dd class='pass'>Aprovado!</dd>";
                         }
                         swatches += "</dl></li>";
                     }
