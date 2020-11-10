@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en-gb">
+<head>
+    <meta charset="utf-8">
+    <meta content="initial-scale=1, width=device-width" name="viewport">
+    <title>Verificador de contraste</title>
+    <style>
+        :root {
+            box-sizing: border-box;
+            font-size: 100%;
+        }
+        :root * {
+            box-sizing: inherit;
+        }
+        body {
+            background-color: #FFF;
+            color: #212121;
+            font-family: "IBM Plex Sans", Roboto, sans-serif;
+            line-height: 1.5rem;
+            margin: 1.5rem;
+        }
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 600;
+            line-height: 3rem;
+            margin: 0;
+            max-width: 45rem;
+        }
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            line-height: 2.25rem;
+            margin: 3rem 0 1.5rem;
+            max-width: 45rem;
+        }
+        h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            line-height: 1.5rem;
+            margin: 0;
+            text-align: center;
+        }
+        textarea {
+            border: 2px solid #757575;
+            border-radius: 0.125rem;
+            color: #212121;
+            font: inherit;
+            height: 3rem;
+            margin: 0 0 1.5rem;
+            max-width: 45rem;
+            padding: calc(0.75rem - 2px);
+            width: 100%;
+        }
+        button {
+            background-color: #757575;
+            border: none;
+            border-radius: 0.125rem;
+            color: #FFF;
+            font: inherit;
+            margin: 1.5rem 0 0;
+            padding: 0.75rem 1.5rem;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+        }
+        select {
+            font: inherit;
+            padding: 0.75rem;
+        }
+        p {
+            max-width: 45rem;
+        }
+        .swatches {
+            display: grid;
+            grid-auto-rows: min-content;
+            grid-column-gap: 1.5rem;
+            grid-row-gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+            list-style: none;
+            margin: 3rem 0;
+            padding: 0;
+        }
+        .swatches li {
+            background-color: #F5F5F5;
+        }
+        .swatches dl {
+            display: flex;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            margin: 0;
+            padding: 0.75rem;
+        }
+        .swatches dt,
+        .swatches dd {
+            margin: 0;
+            width: 50%;
+        }
+        .swatches dd {
+            text-align: right;
+        }
+        .swatches span {
+            display: block;
+            margin: 0 0 0.75rem;
+            padding: 0.75rem 0;
+            text-align: center;
+        }
+        .fail {
+            color: #D50000;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .pass {
+            color: #2E7D32;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <h1>Verificador de contraste</h1>
+    <p>Verifique a taxa de contraste de muitas cores de uma vez</p>
+    <label for="foregrounds">Cores de primeiro plano (como valores HEX)</label>
+    <textarea id="foregrounds" placeholder="#000000"></textarea>
+    <label for="backgrounds">Cores de fundo (como valores HEX)</label>
+    <textarea id="backgrounds" placeholder="#FFCC00"></textarea>
+    <label for="all">
+        <input id="all" name="threshold" type="radio" value="all" checked>
+        Todas as combinações
+    </label>
+    <label for="aa-ui">
+        <input id="aa-ui" name="threshold" type="radio" value="aa-ui">
+        Taxa de contraste de 3.1: 1 ou mais (interface do usuário AA)
+    </label>
+    <label for="aa-text">
+        <input id="aa-text" name="threshold" type="radio" value="aa-text">
+        Taxa de contraste de 4.5: 1 ou mais (texto AA)
+    </label>
+    <label for="aaa-text">
+        <input id="aaa-text" name="threshold" type="radio" value="aaa-text">
+        Taxa de contraste de 7:1 ou mais (texto AAA)
+    </label>
+    <button onclick="generateswatches()">Verifique o contraste</button>
+    <ul class="swatches" id="swatches"></ul>
+    <script>
+        function generateswatches() {
+            var foregrounds = document.querySelector("#foregrounds").value;
+            var backgrounds = document.querySelector("#backgrounds").value;
+            var foregrounds = foregrounds.match(/#[0-9|A-F|a-f]{3,6}/g);
+            var backgrounds = backgrounds.match(/#[0-9|A-F|a-f]{3,6}/g);
+            var foregroundColors = removeDups(foregrounds);
+            var backgroundColors = removeDups(backgrounds);
+            var foregroundColors = foregroundColors.sort();
+            var backgroundColors = backgroundColors.sort();
+            var swatches = "";
+            backgroundColors.forEach(function(backgroundColor) {
+                var backgroundLuminance = getLuminance(backgroundColor);
+                foregroundColors.forEach(function(foregroundColor) {
+                    foregroundLuminance = getLuminance(foregroundColor);
+                    var contrastRatio = (Math.max(foregroundLuminance, backgroundLuminance) + 0.05) / (Math.min(foregroundLuminance, backgroundLuminance) + 0.05);
+                    var radioButtons = document.getElementsByName("threshold");
+                    for (var i = 0; i < radioButtons.length; i++) {
+                        if (radioButtons[i].checked) var threshold = radioButtons[i].value;
+                    }
+                    if ((threshold == "aa-ui" && contrastRatio >= 3) || (threshold == "aa-text" && contrastRatio >= 4.5) || (threshold == "aaa-text" && contrastRatio >= 7) || threshold == "all") {
+                        swatches += "<li><span style='background-color:" + backgroundColor + ";color:" + foregroundColor + "'>Sample text</span>";
+                        swatches += "<h3>" + foregroundColor.toUpperCase() + "<br>" + backgroundColor.toUpperCase() + "</h3>";
+                        swatches += "<dl><dt>Ratio</dt><dd>" + contrastRatio.toFixed(2) + ":1</dd>";
+                        if (contrastRatio < 3) {
+                            swatches += "<dt>AAA text</dt><dd class='fail'>Fail</dd>";
+                            swatches += "<dt>AA text</dt><dd class='fail'>Fail</dd>";
+                            swatches += "<dt>AA UI</dt><dd class='fail'>Fail</dd>";
+                        } else if (contrastRatio < 4.5) {
+                            swatches += "<dt>AAA text</dt><dd class='fail'>Fail</dd>";
+                            swatches += "<dt>AA text</dt><dd class='fail'>Fail</dd>";
+                            swatches += "<dt>AA UI</dt><dd class='pass'>Pass</dd>";
+                        } else if (contrastRatio < 7) {
+                            swatches += "<dt>AAA text</dt><dd class='fail'>Fail</dd>";
+                            swatches += "<dt>AA text</dt><dd class='pass'>Pass</dd>";
+                            swatches += "<dt>AA UI</dt><dd class='pass'>Pass</dd>";
+                        } else {
+                            swatches += "<dt>AAA text</dt><dd class='pass'>Pass</dd>";
+                            swatches += "<dt>AA text</dt><dd class='pass'>Pass</dd>";
+                            swatches += "<dt>AA UI</dt><dd class='pass'>Pass</dd>";
+                        }
+                        swatches += "</dl></li>";
+                    }
+                });
+            });
+            document.getElementById("swatches").innerHTML = swatches;
+        }
+
+        function removeDups(names) {
+            let unique = {};
+            names.forEach(function(i) {
+                if(!unique[i]) {
+                    unique[i] = true;
+                }
+            });
+            return Object.keys(unique);
+        }
+
+        function getLuminance(colour) {
+
+            // Strip leading #
+            var rgb = colour.replace("#","");
+
+            // Expand shorthand hex values, e.g. #123 => #112233
+            if (rgb.length == 3) {
+                rgb =  rgb.substring(0,1) + rgb.substring(0,1) + rgb.substring(1,2) + rgb.substring(1,2) + rgb.substring(2,3) + rgb.substring(2,3);
+            }
+            // Calculate relative luminance https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+            red = parseInt(rgb.substring(0,2), 16) / 255;
+            if (red <= 0.03928) {
+                var r = red / 12.92;
+            } else {
+                var r = ((red + 0.055) / 1.055) ** 2.4;
+            }
+            green = parseInt(rgb.substring(2,4), 16) / 255;
+            if (green <= 0.03928) {
+                var g = green / 12.92;
+            } else {
+                var g = ((green + 0.055) / 1.055) ** 2.4;
+            }
+            blue = parseInt(rgb.substring(4,6), 16) / 255;
+            if (blue <= 0.03928) {
+                var b = blue / 12.92;
+            } else {
+                var b = ((blue + 0.055) / 1.055) ** 2.4;
+            }
+
+            luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            return luminance;
+        }
+    </script>
+</body>
+</html>
